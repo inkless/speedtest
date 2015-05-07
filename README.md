@@ -8,7 +8,7 @@ brew install phantomjs
 
 ## Usage
 Just tell the scripts the url and how many times do you want to request
-```bash
+```
 Usage: ./speedtest.sh [options] [target]
 Options:
   -e, --cache         use cache
