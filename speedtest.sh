@@ -29,18 +29,23 @@ if [[ ! $target ]]; then
     exit
 fi
 
-scripts="eval.js"
-if [ $useCache -eq 1 ]; then
-  scripts="reload.js"
-fi
-
 cat /dev/null > speedtest.log
 
-for i in `seq 1 ${count}`;
-do
-  echo "Downloading page, time: ${i} ..."
-  phantomjs $scripts $target >> speedtest.log
-done
+if [ $useCache -eq 1 ]; then
+  echo "You are estimating pages using cache, it may take a while..."
+  echo "There might be no output in the terminal until it's done..."
+  echo "Please be patient, or you can check the log to see what's going on..."
+  echo "Use command: tail -f speedtest.log"
+  phantomjs eval.js $target $count true >> speedtest.log
+else
+  echo "You are estimating pages without cache, it may take a while..."
+  for i in `seq 1 ${count}`;
+  do
+    echo "Fetching page, time: ${i} ..."
+    phantomjs eval.js $target >> speedtest.log
+  done
+fi
+
 
 echo "Average DOMContentLoaded time is:"
 cat speedtest.log| grep DOMContentLoaded \
