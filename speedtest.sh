@@ -1,18 +1,45 @@
 #!/bin/bash
-if [ "$#" -ne 2  ]; then
-  echo "Usage: ./speedtest.sh http://example.com 10"
-  exit
+useCache=0
+count=1
+
+for i in "$@"
+do
+case $i in
+    -e|--cache)
+    useCache=1
+    shift
+    ;;
+    -c=*|--count=*)
+    count="${i#*=}"
+    shift
+    ;;
+    *)
+    # unknown option
+    ;;
+esac
+done
+
+target=$1;
+
+if [[ ! $target ]]; then
+    echo "Usage: ./speedtest.sh [options] [target]"
+    echo "Options:"
+    echo "  -e, --cache         use cache"
+    echo "  -c, --count=val     how many times do you want to request"
+    exit
 fi
 
-url=$1
-times=$2
+scripts="eval.js"
+if [ $useCache -eq 1 ]; then
+  scripts="reload.js"
+fi
 
 cat /dev/null > speedtest.log
 
-for i in `seq 1 ${times}`;
+for i in `seq 1 ${count}`;
 do
   echo "Downloading page, time: ${i} ..."
-  phantomjs eval.js $url >> speedtest.log
+  phantomjs $scripts $target >> speedtest.log
 done
 
 echo "Average DOMContentLoaded time is:"

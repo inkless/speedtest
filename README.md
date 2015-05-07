@@ -9,5 +9,8 @@ brew install phantomjs
 ## Usage
 Just tell the scripts the url and how many times do you want to request
 ```bash
-./speedtest.sh https://www.dope.com 10
+Usage: ./speedtest.sh [options] [target]
+Options:
+  -e, --cache         use cache
+  -c, --count=val     how many times do you want to request
 ```
