@@ -7,7 +7,7 @@ fi
 url=$1
 times=$2
 
-cat /dev/null > test.log
+cat /dev/null > speedtest.log
 
 for i in `seq 1 ${times}`;
 do
