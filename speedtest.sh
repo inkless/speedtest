@@ -46,14 +46,14 @@ else
   done
 fi
 
-
-echo "Average DOMContentLoaded time is:"
-cat speedtest.log| grep DOMContentLoaded \
-  | awk '{ sum += $3; n++  } END { if (n > 0) print sum / n " msec"; }'
-
-echo "Average Loading time is:"
-cat speedtest.log| grep Loading \
-  | awk '{ sum += $3; n++  } END { if (n > 0) print sum / n "msec"; }'
+keywords=(HeroImageLoaded HalfImagesLoaded EightyPercentsImagesLoaded AllImagesLoaded DOMContentLoaded Loading)
+for i in "${keywords[@]}"
+do
+  echo "Average ${i} time is:"
+  cat speedtest.log| grep $i \
+    | awk '{ sum += $3; n++  } END { if (n > 0) print sum / n " msec"; }'
+  echo $i
+done
 
 echo "You can check the log to get more information."
 #cat speedtest.log | grep -e 'Loading\|DOMContent'
