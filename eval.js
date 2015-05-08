@@ -131,11 +131,23 @@ if (system.args.length === 1) {
       // Specific for Compose:
       if (typeof COMPOSE_DATA === 'object') {
         Loader(function() {
-
-          // wait angular
-          setTimeout(function() {
+          // if there's a gallery
+          // we have to wait until angular directive actually rendered the images
+          if ($(".lego-generic-image-gallery").length) {
+            var scope = $(".lego-generic-image-gallery").scope();
+            var deregister = scope.$watch(function() {
+              return $('.gallery-slideshow img').length;
+            }, function(v) {
+              if (v) {
+                deregister();
+                checkImageLoading();
+              }
+            });
+          }
+          // if no gallery, just check image loading
+          else {
             checkImageLoading();
-          }, 500);
+          }
         });
       } else {
         checkImageLoading();

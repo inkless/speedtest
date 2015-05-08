@@ -52,7 +52,6 @@ do
   echo "Average ${i} time is:"
   cat speedtest.log| grep $i \
     | awk '{ sum += $3; n++  } END { if (n > 0) print sum / n " msec"; }'
-  echo $i
 done
 
 echo "You can check the log to get more information."
