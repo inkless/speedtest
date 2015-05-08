@@ -115,12 +115,17 @@ if (system.args.length === 1) {
    */
   function evalFunction() {
     var docWidth,
-      docHeight;
+      docHeight,
+      totalImagesCount,
+      allImages,
+      needLoad;
 
     document.addEventListener('DOMContentLoaded', function() {
 
       docWidth = document.body.offsetWidth;
       docHeight = document.body.offsetHeight;
+      allImages = [];
+      totalImagesCount = needLoad = 0;
 
       // call phantom
       window.callPhantom({
@@ -128,55 +133,68 @@ if (system.args.length === 1) {
         name: 'DOMContentLoaded'
       });
 
-      // Specific for Compose:
-      if (typeof COMPOSE_DATA === 'object') {
-        Loader(function() {
-          // if there's a gallery
-          // we have to wait until angular directive actually rendered the images
-          if ($(".lego-generic-image-gallery").length) {
-            var scope = $(".lego-generic-image-gallery").scope();
-            var deregister = scope.$watch(function() {
-              return $('.gallery-slideshow img').length;
-            }, function(v) {
-              if (v) {
-                deregister();
-                checkImageLoading();
-              }
-            });
-          }
-          // if no gallery, just check image loading
-          else {
-            checkImageLoading();
-          }
-        });
-      } else {
-        checkImageLoading();
-      }
+      throttle(function() {
+        checkImageLoading(document.getElementsByTagName('img'));
+      }, 500);
 
     }, false);
 
-    function checkImageLoading() {
-      var imgs = document.getElementsByTagName('img'),
-        imgCount = imgs.length,
-        needLoad = imgCount;
+    function throttle(func, t, total) {
+      t = t || 1000;
+      total = total || 10;
+      var _f = function() {
+        func();
+        if (--total === 0) {
+          return;
+        }
+        setTimeout(_f, t);
+      };
+      _f();
+    }
+
+    function addToAllImages(imgs) {
+      var added = [];
+
+      // if we have new images
+      if (imgs.length > allImages.length) {
+        imgs = Array.prototype.slice.apply(imgs);
+        imgs.forEach(function(img) {
+          // img not in our allImages,
+          // we need to add it into allImages
+          if (!~allImages.indexOf(img)) {
+            allImages.push(img);
+            added.push(img);
+          }
+        });
+      }
+      return added;
+    }
+
+    function checkImageLoading(imgs) {
+      var added = addToAllImages(imgs);
+      // if nothing added, just return
+      if (!added.length) {
+        return;
+      }
+
+      totalImagesCount += added.length;
+      needLoad += added.length;
 
       // show images number
-      window.callPhantom('Initial images need to be loaded: ' + imgs.length);
+      window.callPhantom('Adding ' + added.length + ' images, total remain:' + needLoad);
 
-      imgs = Array.prototype.slice.apply(imgs);
-
-      imgs.forEach(function(img, index) {
+      added.forEach(function(img, index) {
         if (img.complete) {
           --needLoad;
           logImage(img);
-          checkNeedLoad(needLoad, imgCount);
+          checkNeedLoad();
           return;
         }
 
         img.onload = function() {
           --needLoad;
           logImage(img);
-          checkNeedLoad(needLoad, imgCount);
+          checkNeedLoad();
         };
       });
     }
@@ -204,15 +222,15 @@ if (system.args.length === 1) {
       halfDone = false,
       mostDone = false;
 
-    function checkNeedLoad(needLoad, imgCount) {
+    function checkNeedLoad() {
       // window.callPhantom('image loaded, remain: ' + needLoad);
-      if (needLoad < imgCount / 2 && !halfDone) {
+      if (needLoad < totalImagesCount / 2 && !halfDone) {
         window.callPhantom({
           type: 'timer',
           name: 'HalfImagesLoaded'
         });
         halfDone = true;
-      } else if (needLoad < imgCount / 5 && !mostDone) {
+      } else if (needLoad < totalImagesCount / 5 && !mostDone) {
         window.callPhantom({
           type: 'timer',
           name: 'EightyPercentsImagesLoaded'
