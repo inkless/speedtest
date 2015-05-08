@@ -46,7 +46,10 @@ else
   done
 fi
 
-keywords=(HeroImageLoaded HalfImagesLoaded EightyPercentsImagesLoaded AllImagesLoaded DOMContentLoaded Loading)
+keywords=(HeroImageLoaded HalfInitialImagesLoaded AllInitialImagesLoaded \
+  HalfImagesLoaded EightyPercentsImagesLoaded AllImagesLoaded \
+  DOMContentLoaded Loading)
+
 for i in "${keywords[@]}"
 do
   echo "Average ${i} time is:"

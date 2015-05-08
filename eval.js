@@ -58,7 +58,7 @@ if (system.args.length === 1) {
     // we record the time
     else {
       page.endTime = Date.now();
-      showHeroImageLog();
+      showImagesLoadingTime();
       console.log('Loading time ' + (Date.now() - page.startTime) + ' msec');
     }
     
@@ -87,7 +87,7 @@ if (system.args.length === 1) {
     if (typeof data === "object") {
       switch (data.type) {
         case 'timer':
-          console.log(data.name + ' time ' + (Date.now() - page.startTime) + ' msec');
+          consoleTimer(data);
           break;
         case 'image':
           data.timestamp = Date.now();
@@ -100,10 +100,80 @@ if (system.args.length === 1) {
     console.log(data);
   };
 
-  function showHeroImageLog() {
-    imageResources.forEach(function(img) {
+  function showImagesLoadingTime() {
+
+    var total = imageResources.length,
+      allDone = false,
+      mostDone = false,
+      halfDone = false;
+
+    // sort by timestamp asc
+    imageResources.sort(function(a, b) {
+      return a.timestamp > b.timestamp;
+    });
+
+    // show hero images
+    imageResources.forEach(function(img, index) {
       if (img.width > HERO_IMAGE_WIDTH || img.height > HERO_IMAGE_WIDTH) {
-        console.log("HeroImageLoaded time " + (img.timestamp - page.startTime) + " msec with width " + img.width + ", height " + img.height + ", src " + img.src);
+        consoleTimer({
+          name: 'HeroImageLoaded',
+          ts: img.timestamp,
+          ext: "with width " + img.width + ", height " + img.height + ", src " + img.src
+        });
+      }
+      var i = index+1;
+
+      if ((i > total / 2) && !halfDone) {
+        consoleTimer({
+          name: 'HalfImagesLoaded',
+          ts: img.timestamp
+        });
+        halfDone = true;
+      }
+
+      if ((i > total * 0.8) && !mostDone) {
+        consoleTimer({
+          name: 'EightyPercentsImagesLoaded',
+          ts: img.timestamp
+        });
+        mostDone = true;
+      }
+
+      if ((i === total) && !allDone) {
+        consoleTimer({
+          name: 'AllImagesLoaded',
+          ts: img.timestamp
+        });
+        allDone = true;
+      }
+
+    });
+
+    var initialImageResouces = imageResources.filter(function(v) {
+      return v.initial;
+    });
+
+    var initialImagesCount = initialImageResouces.length,
+      initialHalfDone = false,
+      initialAllDone = false;
+
+    initialImageResouces.forEach(function(img, index) {
+      var i = index+1;
+
+      if ((i > initialImagesCount / 2) && !initialHalfDone) {
+        consoleTimer({
+          name: 'HalfInitialImagesLoaded',
+          ts: img.timestamp
+        });
+        initialHalfDone = true;
+      }
+
+      if ((i === initialImagesCount) && !initialAllDone) {
+        consoleTimer({
+          name: 'AllInitialImagesLoaded',
+          ts: img.timestamp
+        });
+        initialAllDone = true;
       }
     });
   }
@@ -171,6 +241,7 @@ if (system.args.length === 1) {
     }
 
     function checkImageLoading(imgs) {
+      var initialCheck = totalImagesCount === 0;
       var added = addToAllImages(imgs);
       // if nothing added, just return
       if (!added.length) {
@@ -184,17 +255,16 @@ if (system.args.length === 1) {
       window.callPhantom('Adding ' + added.length + ' images, total remain:' + needLoad);
 
       added.forEach(function(img, index) {
+        img.initial = initialCheck;
         if (img.complete) {
           --needLoad;
           logImage(img);
-          checkNeedLoad();
           return;
         }
 
         img.onload = function() {
           --needLoad;
           logImage(img);
-          checkNeedLoad();
         };
       });
     }
@@ -212,38 +282,18 @@ if (system.args.length === 1) {
             type: 'image',
             width: img.offsetWidth,
             height: img.offsetHeight,
-            src: img.src
+            src: img.src,
+            initial: img.initial
           });
         }
       }
     }
+  }
 
-    var allDone = false,
-      halfDone = false,
-      mostDone = false;
-
-    function checkNeedLoad() {
-      // window.callPhantom('image loaded, remain: ' + needLoad);
-      if (needLoad < totalImagesCount / 2 && !halfDone) {
-        window.callPhantom({
-          type: 'timer',
-          name: 'HalfImagesLoaded'
-        });
-        halfDone = true;
-      } else if (needLoad < totalImagesCount / 5 && !mostDone) {
-        window.callPhantom({
-          type: 'timer',
-          name: 'EightyPercentsImagesLoaded'
-        });
-        mostDone = true;
-      } else if (needLoad === 0 && !allDone) {
-        window.callPhantom({
-          type: 'timer',
-          name: 'AllImagesLoaded'
-        });
-        allDone = true;
-      }
-    }
+  function consoleTimer(data) {
+    var ts = data.ts || Date.now(),
+      ext = data.ext || "";
+    console.log(data.name + ' time ' + (ts - page.startTime)  + ' msec ' + ext);
   }
 
   page.open(page.address);
