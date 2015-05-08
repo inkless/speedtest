@@ -45,27 +45,33 @@ if (system.args.length === 1) {
   page.onLoadFinished = function(status) {
     if (status !== 'success') {
       console.log('FAIL to load the address');
-    } else {
-      // if it's using cache, and it's the first time loading
-      // we set isReload to true
-      if (args.useCache && !page.isReload) {
-        page.isReload = true;
-      }
-      // if it's not using cache or it's reload
-      // we record the time
-      else {
-        page.endTime = Date.now();
-        showImagesLoadingTime();
-        console.log('Loading time ' + (Date.now() - page.startTime) + ' msec');
-      }
+      setTimeout(reloadPage, 10);
+      return;
     }
-    
+
+    // if it's using cache, and it's the first time loading
+    // we set isReload to true
+    if (args.useCache && !page.isReload) {
+      page.isReload = true;
+    }
+    // if it's not using cache or it's reload
+    // we record the time
+    else {
+      page.endTime = Date.now();
+      showImagesLoadingTime();
+      console.log('Loading time ' + (Date.now() - page.startTime) + ' msec');
+    }
+
+    reloadPage();
+  };
+
+  function reloadPage() {
     if (--args.count > 0) {
       page.reload();
     } else {
       phantom.exit();
     }
-  };
+  }
 
   page.onInitialized = function() {
 
