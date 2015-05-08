@@ -57,6 +57,9 @@ do
     | awk '{ sum += $3; n++  } END { if (n > 0) print sum / n " msec"; }'
 done
 
+failCounts=`cat speedtest.log| grep 'FAIL to load the address' | wc -l`
+echo "Fail counts: $failCounts"
+
 echo "You can check the log to get more information."
 #cat speedtest.log | grep -e 'Loading\|DOMContent'
 
