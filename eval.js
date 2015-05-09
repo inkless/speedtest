@@ -209,13 +209,13 @@ if (system.args.length === 1) {
 
       throttle(function() {
         checkImageLoading(document.getElementsByTagName('img'));
-      }, 500);
+      }, 200);
 
     }, false);
 
     function throttle(func, t, total) {
       t = t || 1000;
-      total = total || 10;
+      total = total || 20;
       var _f = function() {
         func();
         if (--total === 0) {
