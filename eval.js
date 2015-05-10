@@ -45,7 +45,7 @@ if (system.args.length === 1) {
   page.onLoadFinished = function(status) {
     if (status !== 'success') {
       console.log('FAIL to load the address');
-      setTimeout(reloadPage, 10);
+      setTimeout(reloadPage, 1000);
       return;
     }
 
@@ -67,7 +67,10 @@ if (system.args.length === 1) {
 
   function reloadPage() {
     if (--args.count > 0) {
-      page.reload();
+      page.open(page.address);
+      // cannot use page.reload,
+      // it's tooooo fast....
+      // page.reload();
     } else {
       phantom.exit();
     }
