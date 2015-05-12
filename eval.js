@@ -121,7 +121,7 @@ if (system.args.length === 1) {
 
     // show hero images
     imageResources.forEach(function(img, index) {
-      if (img.width > HERO_IMAGE_WIDTH || img.height > HERO_IMAGE_WIDTH) {
+      if ((img.width > HERO_IMAGE_WIDTH || img.height > HERO_IMAGE_WIDTH) && img.visible) {
         consoleTimer({
           name: 'HeroImageLoaded',
           ts: img.timestamp,
@@ -277,6 +277,7 @@ if (system.args.length === 1) {
     }
 
     function logImage(img) {
+      var visible = false;
       if (img.offsetWidth) {
         var rect = img.getBoundingClientRect();
         // images which are really showing in the website
@@ -284,16 +285,18 @@ if (system.args.length === 1) {
           && rect.top + img.offsetHeight / 2 < docHeight
           && rect.left > 0
           && rect.left + img.offsetWidth / 2 < docWidth) {
-
-          window.callPhantom({
-            type: 'image',
-            width: img.offsetWidth,
-            height: img.offsetHeight,
-            src: img.src,
-            initial: img.initial
-          });
+          visible = true;
         }
       }
+
+      window.callPhantom({
+        type: 'image',
+        width: img.offsetWidth,
+        height: img.offsetHeight,
+        src: img.src,
+        initial: img.initial,
+        visible: visible
+      });
     }
   }
 
