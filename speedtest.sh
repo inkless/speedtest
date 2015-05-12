@@ -29,20 +29,23 @@ if [[ ! $target ]]; then
     exit
 fi
 
-cat /dev/null > speedtest.log
+timestamp=$(date +%s)
+logName=speedtest_${timestamp}.log
+
+cat /dev/null > $logName
 
 if [ $useCache -eq 1 ]; then
   echo "You are estimating pages using cache, it may take a while..."
   echo "There might be no output in the terminal until it's done..."
   echo "Please be patient, or you can check the log to see what's going on..."
-  echo "Use command: tail -f speedtest.log"
-  phantomjs eval.js $target $count true >> speedtest.log
+  echo "Use command: tail -f $logName"
+  phantomjs eval.js $target $count true >> $logName
 else
   echo "You are estimating pages without cache, it may take a while..."
   for i in `seq 1 ${count}`;
   do
     echo "Fetching page, time: ${i} ..."
-    phantomjs eval.js $target >> speedtest.log
+    phantomjs eval.js $target >> $logName
   done
 fi
 
@@ -53,13 +56,13 @@ keywords=(HeroImageLoaded HalfInitialImagesLoaded AllInitialImagesLoaded \
 for i in "${keywords[@]}"
 do
   echo "Average ${i} time is:"
-  cat speedtest.log| grep $i \
+  cat $logName| grep $i \
     | awk '{ sum += $3; n++  } END { if (n > 0) print sum / n " msec"; }'
 done
 
-failCounts=`cat speedtest.log| grep 'FAIL to load the address' | wc -l`
+failCounts=`cat $logName| grep 'FAIL to load the address' | wc -l`
 echo "Fail counts: $failCounts"
 
 echo "You can check the log to get more information."
-#cat speedtest.log | grep -e 'Loading\|DOMContent'
+#cat $logName | grep -e 'Loading\|DOMContent'
 
