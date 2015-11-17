@@ -51,7 +51,7 @@ fi
 
 keywords=(HeroImageLoaded HalfInitialImagesLoaded AllInitialImagesLoaded \
   HalfImagesLoaded EightyPercentsImagesLoaded AllImagesLoaded \
-  DOMContentLoaded Loading)
+  DOMContentLoaded Loading OnloadEvent)
 
 for i in "${keywords[@]}"
 do
@@ -65,4 +65,3 @@ echo "Fail counts: $failCounts"
 
 echo "You can check the log to get more information."
 #cat $logName | grep -e 'Loading\|DOMContent'
-

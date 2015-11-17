@@ -23,7 +23,7 @@ if (system.args.length === 1) {
   args.count = parseInt(system.args[2]) || 1;
   args.useCache = system.args[3] || false;
 
-  // if we need to check use cache, we need to load 
+  // if we need to check use cache, we need to load
   // one more time to get the cache
   if (args.useCache) {
     args.count += 1;
@@ -214,6 +214,13 @@ if (system.args.length === 1) {
         checkImageLoading(document.getElementsByTagName('img'));
       }, 200);
 
+    }, false);
+
+    window.addEventListener('load', function() {
+      window.callPhantom({
+        type: 'timer',
+        name: 'OnloadEvent'
+      });
     }, false);
 
     function throttle(func, t, total) {
