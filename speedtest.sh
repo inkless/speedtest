@@ -39,13 +39,13 @@ if [ $useCache -eq 1 ]; then
   echo "There might be no output in the terminal until it's done..."
   echo "Please be patient, or you can check the log to see what's going on..."
   echo "Use command: tail -f $logName"
-  phantomjs eval.js $target $count true >> $logName
+  phantomjs --ignore-ssl-errors=true eval.js $target $count true >> $logName
 else
   echo "You are estimating pages without cache, it may take a while..."
   for i in `seq 1 ${count}`;
   do
     echo "Fetching page, time: ${i} ..."
-    phantomjs eval.js $target >> $logName
+    phantomjs --ignore-ssl-errors=true eval.js $target >> $logName
   done
 fi
 
